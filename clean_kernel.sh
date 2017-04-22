@@ -16,10 +16,10 @@ CLEANUP()
 
 	echo "Cleaning READY dir......."
 	sleep 1;
-	rm -rf "$KERNELDIR"/READY/boot
-	rm -rf "$KERNELDIR"/READY/*.img
-	rm -rf "$KERNELDIR"/READY/*.zip
-	rm -rf "$KERNELDIR"/READY/*.sh
+	rm -rf ../../READY/boot
+	rm -rf ../../READY/*.img
+	rm -rf ../../READY/*.zip
+	rm -rf ../../READY/*.sh
 	rm -f "$KERNELDIR"/.config
 	#### Cleanup bootimg_tools now #####
 	echo "Cleaning bootimg_tools from unneeded data..."
@@ -38,7 +38,7 @@ CLEANUP()
 	echo "Deleted all files from ramdisk dir in bootimg_tools";
 
 	
-	mkdir -p "$KERNELDIR"/READY/
+	mkdir -p ../../READY/
 	
 	echo "Clean all files from temporary"
 	if [ ! -d ../"$RAMDISK_TMP" ]; then
@@ -47,13 +47,6 @@ CLEANUP()
 		chmod 777 ../"$RAMDISK_TMP"
 	else
 		rm -rf ../"$RAMDISK_TMP"/*
-	fi;
-
-	echo "Make RELEASE directory if it doesn't exist and clean it if it exists"
-	if [ ! -d ../RELEASE ]; then
-		mkdir ../RELEASE
-	else
-		rm -rf ../RELEASE/*
 	fi;
 
 

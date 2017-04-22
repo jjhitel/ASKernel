@@ -15,16 +15,11 @@ LANG=C
 # -----ramdisk_source/ ## defined by RAMDISK_TMP var
 # -----ramdisk_tmp/ ## defined by RAMDISK_DIR var
 # -----kernel_source/ #### can have any name
-# -----aarch64-linux-android-4.9/
-# -----RELEASE/
+# -----android-toolchain/
 
 ## TOOLCHAIN INFO ##
 # You just need to have correct folder structure and run this script.
 # Everything will be auto-built
-
-## FLASHABLE ZIP ##
-# Flashable zip will be located in project_root/RELEASE directory
-# and will have name Kernel-a7xeltekor.zip
 
 # location defines
 KERNELDIR=$(readlink -f .);
@@ -40,10 +35,10 @@ CLEANUP()
 
 	echo "Cleaning READY dir......."
 	sleep 1;
-	rm -rf "$KERNELDIR"/READY/boot
-	rm -rf "$KERNELDIR"/READY/*.img
-	rm -rf "$KERNELDIR"/READY/*.zip
-	rm -rf "$KERNELDIR"/READY/*.sh
+	rm -rf ../../READY/boot
+	rm -rf ../../READY/*.img
+	rm -rf ../../READY/*.zip
+	rm -rf ../../READY/*.sh
 	rm -f "$KERNELDIR"/.config
 	#### Cleanup bootimg_tools now #####
 	echo "Cleaning bootimg_tools from unneeded data..."
@@ -65,13 +60,6 @@ CLEANUP()
 		chmod 777 ../"$RAMDISK_TMP"
 	else
 		rm -rf ../"$RAMDISK_TMP"/*
-	fi;
-
-	echo "Make RELEASE directory if it doesn't exist and clean it if it exists"
-	if [ ! -d ../RELEASE ]; then
-		mkdir ../RELEASE
-	else
-		rm -rf ../RELEASE/*
 	fi;
 
 
@@ -109,7 +97,7 @@ BUILD_NOW()
 	fi;
 
 	# build Image
-	time make ARCH=arm64 CROSS_COMPILE=../aarch64-linux-android-4.9/bin/aarch64-linux-android- Image.gz-dtb -j ${NR_CPUS}
+	time make ARCH=arm64 CROSS_COMPILE=../android-toolchain/bin/aarch64-linux-gnu- Image.gz-dtb -j ${NR_CPUS}
 
 	stat "$KERNELDIR"/arch/arm64/boot/Image || exit 1;
 
@@ -123,7 +111,7 @@ BUILD_NOW()
 
 	if [ -e "$KERNELDIR"/arch/arm64/boot/Image ]; then
 		cp arch/arm64/boot/Image bootimg_tools/boot_a7xeltekor/kernel
-		cp .config READY/view_only_config
+		cp .config ../READY/view_only_config
 
 		# copy all ramdisk files to ramdisk temp dir.
 		cp -a ../"$RAMDISK_TMP"/* bootimg_tools/boot_a7xeltekor/ramdisk/
@@ -134,20 +122,18 @@ BUILD_NOW()
 		# Build boot.img and move it to READY dir
 		echo "Move boot.img to READY/boot.img"
 		cd bootimg_tools
-		./mkboot boot_a7xeltekor ../READY/boot.img
-		# Make flashable zip
-		cd ../READY
-		zip -r Kernel-a7xeltekor.zip * >/dev/null
-		mv Kernel-a7xeltekor.zip ../../RELEASE/
-
+		./mkboot boot_a7xeltekor ../../READY/boot.img
+		
+		# Remove seandroid not enforcing warning on boot
+		cd ../../READY
+		echo "SEANDROIDENFORCE" >> boot.img
 
 		# Add proper timestamps to default.prop in ramdisk
-
 		DATE=$(date)
 		DATEUTC=$(date +%s)
 
-		sed -i "s/ro.bootimage.build.date=.*/ro.bootimage.build.date=${DATE}/g" ../../"$RAMDISK_DIR"/default.prop
-		sed -i "s/ro.bootimage.build.date.utc=.*/ro.bootimage.build.date.utc=${DATEUTC}/g" ../../"$RAMDISK_DIR"/default.prop
+		sed -i "s/ro.bootimage.build.date=.*/ro.bootimage.build.date=${DATE}/g" ../"$RAMDISK_DIR"/default.prop
+		sed -i "s/ro.bootimage.build.date.utc=.*/ro.bootimage.build.date.utc=${DATEUTC}/g" ../"$RAMDISK_DIR"/default.prop
 
 	else
 		# with red-color
