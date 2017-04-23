@@ -265,7 +265,7 @@ again:
 	 *
 	 * Use this result only if there is no timer to wake us up sooner.
 	 */
-	if (likely(variance <= U64_MAX/36)) {
+	if (likely(variance <= U32_MAX/36)) {
 		if ((((u64)avg*avg > variance*36) && (divisor * 4 >= INTERVALS * 3))
 							|| variance <= 400) {
 			return avg;
